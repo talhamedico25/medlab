@@ -1,12 +1,14 @@
-import { GoogleGenAI, SchemaType } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const { prompt } = await req.json();
+    
+    // Ensure you have added API_KEY to Netlify's Environment Variables
     const genAI = new GoogleGenAI(process.env.API_KEY!);
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-pro", // Note: use 'gemini-1.5-pro' as 'gemini-3' doesn't exist yet
+      model: "gemini-1.5-flash", // Using Flash for faster clinical reasoning
     });
 
     const result = await model.generateContent({
@@ -14,23 +16,25 @@ export async function POST(req: Request) {
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: {
-          type: SchemaType.OBJECT,
+          type: Type.OBJECT,
           properties: {
-            summary: { type: SchemaType.STRING },
-            considerations: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING } },
-            redFlagStatus: { type: SchemaType.STRING },
-            redFlagDetails: { type: SchemaType.STRING },
-            nextSteps: { type: SchemaType.STRING },
-            medicalEducation: { type: SchemaType.STRING },
-            isEmergencyOverride: { type: SchemaType.BOOLEAN }
+            summary: { type: Type.STRING },
+            considerations: { type: Type.ARRAY, items: { type: Type.STRING } },
+            redFlagStatus: { type: Type.STRING },
+            redFlagDetails: { type: Type.STRING },
+            nextSteps: { type: Type.STRING },
+            medicalEducation: { type: Type.STRING },
+            isEmergencyOverride: { type: Type.BOOLEAN }
           },
           required: ['summary', 'considerations', 'redFlagStatus', 'redFlagDetails', 'nextSteps', 'medicalEducation', 'isEmergencyOverride']
         }
       }
     });
 
-    return NextResponse.json(JSON.parse(result.response.text()));
+    const textResponse = result.response.text();
+    return NextResponse.json(JSON.parse(textResponse));
   } catch (error) {
-    return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
+    console.error("AI Analysis Error:", error);
+    return NextResponse.json({ error: "Clinical reasoning analysis failed." }, { status: 500 });
   }
 }
