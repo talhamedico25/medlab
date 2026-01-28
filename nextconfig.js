@@ -1,7 +1,8 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // This is the "secret sauce" for Netlify to find your pages
+  output: 'standalone', 
 };
 
-module.exports = nextConfig;
+export default nextConfig;
