@@ -12,7 +12,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "@google/genai": "^1.38.0",
-    "@netlify/plugin-nextjs": "latest"
+    "@netlify/plugin-nextjs": "latest",
     "lucide-react": "latest",
     "clsx": "latest",
     "tailwind-merge": "latest"
