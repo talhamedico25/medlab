@@ -5,12 +5,11 @@ export async function POST(req: Request) {
   try {
     const { prompt } = await req.json();
     
-    // 1. Initialize with the correct API Key object
-    const genAI = new GoogleGenAI(process.env.API_KEY!);
+    // The SDK now requires an object with the apiKey property
+    const genAI = new GoogleGenAI({ apiKey: process.env.API_KEY! });
     
-    // 2. Use the correct method to get the model
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash", // Using Flash for speed and clinical logic
+      model: "gemini-1.5-flash", 
     });
 
     const result = await model.generateContent({
@@ -33,10 +32,10 @@ export async function POST(req: Request) {
       }
     });
 
-    const textResponse = await result.response.text();
-    return NextResponse.json(JSON.parse(textResponse));
+    const responseText = await result.response.text();
+    return NextResponse.json(JSON.parse(responseText));
   } catch (error) {
     console.error("Clinical Reasoning Error:", error);
-    return NextResponse.json({ error: "Analysis failed. Please try again." }, { status: 500 });
+    return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
   }
 }
