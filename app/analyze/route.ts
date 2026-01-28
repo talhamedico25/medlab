@@ -5,16 +5,14 @@ export async function POST(req: Request) {
   try {
     const { prompt } = await req.json();
     
-    // The SDK now requires an object with the apiKey property
-    const genAI = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+    // 1. In @google/genai (v1+), we use a unified Client structure
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
     
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash", 
-    });
-
-    const result = await model.generateContent({
+    // 2. Models are accessed through ai.models.generateContent
+    const response = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
+      config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -32,10 +30,12 @@ export async function POST(req: Request) {
       }
     });
 
-    const responseText = await result.response.text();
-    return NextResponse.json(JSON.parse(responseText));
-  } catch (error) {
+    // 3. The response text is accessed directly
+    const resultText = response.text;
+    return NextResponse.json(JSON.parse(resultText || "{}"));
+    
+  } catch (error: any) {
     console.error("Clinical Reasoning Error:", error);
-    return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Analysis failed" }, { status: 500 });
   }
 }
