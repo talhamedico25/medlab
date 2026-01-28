@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Removed 'standalone' to let Netlify's Runtime v5 handle the build
+  // DO NOT use output: 'standalone' here
 };
 
 module.exports = nextConfig;
