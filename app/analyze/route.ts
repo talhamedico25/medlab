@@ -5,10 +5,11 @@ export async function POST(req: Request) {
   try {
     const { prompt } = await req.json();
     
-    // Ensure you have added API_KEY to Netlify's Environment Variables
-    const genAI = new GoogleGenAI(process.env.API_KEY!);
+    // The SDK now requires an object with the apiKey property
+    const genAI = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+    
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash", // Using Flash for faster clinical reasoning
+      model: "gemini-1.5-flash", 
     });
 
     const result = await model.generateContent({
@@ -31,10 +32,9 @@ export async function POST(req: Request) {
       }
     });
 
-    const textResponse = result.response.text();
-    return NextResponse.json(JSON.parse(textResponse));
+    return NextResponse.json(JSON.parse(result.response.text()));
   } catch (error) {
-    console.error("AI Analysis Error:", error);
-    return NextResponse.json({ error: "Clinical reasoning analysis failed." }, { status: 500 });
+    console.error("Build Error:", error);
+    return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
   }
 }
