@@ -46,41 +46,23 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
 
   const handleAnalyze = async () => {
-    if (!input.trim()) return;
-    setIsAnalyzing(true);
-    setError(null);
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
-        contents: input,
-        config: {
-          systemInstruction: `You are a Clinical Reasoning Assistant created by Talha & Vareesha (Batch of 2030, KMC). 
-          Strictly educational. No diagnosis. Return JSON for: summary, considerations[], redFlagStatus, redFlagDetails, nextSteps, medicalEducation, isEmergencyOverride.`,
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              summary: { type: Type.STRING },
-              considerations: { type: Type.ARRAY, items: { type: Type.STRING } },
-              redFlagStatus: { type: Type.STRING },
-              redFlagDetails: { type: Type.STRING },
-              nextSteps: { type: Type.STRING },
-              medicalEducation: { type: Type.STRING },
-              isEmergencyOverride: { type: Type.BOOLEAN }
-            },
-            required: ['summary', 'considerations', 'redFlagStatus', 'redFlagDetails', 'nextSteps', 'medicalEducation', 'isEmergencyOverride']
-          }
-        }
-      });
-      setResult(JSON.parse(response.text || '{}'));
-    } catch (err) {
-      setError("Clinical reasoning analysis failed. Ensure symptoms are detailed.");
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
+  if (!input.trim()) return;
+  setIsAnalyzing(true);
+  setError(null);
+  try {
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      body: JSON.stringify({ prompt: input }),
+    });
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+    setResult(data);
+  } catch (err) {
+    setError("Analysis failed. Please try again.");
+  } finally {
+    setIsAnalyzing(false);
+  }
+};
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 space-y-16">
       {/* Navbar */}
