@@ -1,3 +1,4 @@
+"use client"; // <--- THIS LINE IS THE FIX
 
 import React, { useState } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
